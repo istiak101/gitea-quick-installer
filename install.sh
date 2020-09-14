@@ -9,10 +9,12 @@ echo -e "Please enter new root password for MySQL: "
 read mysqlrootpass
 echo -e "Please enter database name you want to use for Gitea: "
 read giteadbname
-echo -e "Please enter database username you want to use for Gitea: "
+echo -e "Please enter database username you want to use for Gitea Database($giteadbname): "
 read giteadbuser
 echo -e "Please enter database password you want to use for Gitea($giteadbuser): "
 read giteadbpass
+echo -e "Please enter system username you want to use for Gitea: "
+read giteauser
 
 # Update everything first
 yum update -y
@@ -48,15 +50,15 @@ GRANT ALL ON $giteadbname.* TO '$giteadbuser'@'localhost' IDENTIFIED BY '$gitead
 FLUSH PRIVILEGES;
 EOF
 
-# Add user for Gitea named as "git"
-adduser --system --shell /bin/bash --comment 'Git Version Control' --user-group --home-dir /home/git -m git
+# Add user for Gitea
+adduser --system --shell /bin/bash --comment 'Git Version Control' --user-group --home-dir /home/$giteauser -m $giteauser
 
 # Create directory structure
 mkdir -p /var/lib/gitea/{custom,data,indexers,public,log}
-chown git:git /var/lib/gitea/{data,indexers,log}
+chown $giteauser:$giteauser /var/lib/gitea/{data,indexers,log}
 chmod 750 /var/lib/gitea/{data,indexers,log}
 mkdir /etc/gitea
-chown root:git /etc/gitea
+chown root:$giteauser /etc/gitea
 chmod 770 /etc/gitea
 
 # Download & Install Gitea
@@ -82,12 +84,12 @@ After=mariadb.service
 #LimitNOFILE=65535
 RestartSec=2s
 Type=simple
-User=git
-Group=git
+User=$giteauser
+Group=$giteauser
 WorkingDirectory=/var/lib/gitea/
 ExecStart=/usr/local/bin/gitea web -c /etc/gitea/app.ini
 Restart=always
-Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/gitea
+Environment=USER=$giteauser HOME=/home/$giteauser GITEA_WORK_DIR=/var/lib/gitea
 # If you want to bind Gitea to a port below 1024 uncomment
 # the two values below
 ###
