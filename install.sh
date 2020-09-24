@@ -19,15 +19,17 @@ read giteauser
 # Update everything first
 yum update -y
 
-# Install Git now
-yum -y install git
+# Install EPEL
+yum -y install epel-release
 
-# Install MariaDB for database
-yum -y install mariadb-server
+# Install required packages
+yum -y install git mariadb-server nginx
 
-# Enable MariaDB on boot and start the server
+# Enable MariaDB & Nginx on boot and start the server
 systemctl enable mariadb.service
 systemctl start mariadb.service
+systemctl enable nginx
+systemctl start nginx
 
 # MySQL Secure Installation
 mysql -u root <<-EOF
@@ -108,9 +110,30 @@ systemctl start gitea
 # Check if Gitea is running
 systemctl status gitea
 
+# Create Nginx config
+touch /etc/nginx/conf.d/gitea.conf
+
+cat > /etc/nginx/conf.d/gitea.conf <<EOF
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://localhost:3000;
+    }
+}
+EOF
+
+# Restart Nginx
+systemctl restart nginx
+
 # Firewall setup
+sudo firewall-cmd --add-port 80/tcp --permanent
 sudo firewall-cmd --add-port 3000/tcp --permanent
 sudo firewall-cmd --reload
+
+# SELinux permission
+setsebool -P httpd_can_network_connect 1
 
 # Print all password and necessary instructions needed later
 echo "******************************************************"
