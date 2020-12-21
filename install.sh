@@ -141,6 +141,7 @@ echo "MySQL root password: $mysqlrootpass"
 echo "Gitea database name: $giteadbname"
 echo "Gitea database username: $giteadbuser"
 echo "Gitea database password: $giteadbpass"
+echo "Gitea user: $giteauser"
 echo "******************************************************"
 
 # Get IP
