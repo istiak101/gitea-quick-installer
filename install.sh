@@ -26,10 +26,8 @@ yum -y install epel-release
 yum -y install git mariadb-server nginx
 
 # Enable MariaDB & Nginx on boot and start the server
-systemctl enable mariadb.service
-systemctl start mariadb.service
-systemctl enable nginx
-systemctl start nginx
+systemctl enable --now mariadb
+systemctl enable --now nginx
 
 # MySQL Secure Installation
 mysql -u root <<-EOF
@@ -64,7 +62,7 @@ chown root:$giteauser /etc/gitea
 chmod 770 /etc/gitea
 
 # Download & Install Gitea
-wget -O gitea https://dl.gitea.io/gitea/1.13.0/gitea-1.13.0-linux-amd64
+wget -O gitea https://dl.gitea.io/gitea/1.14.1/gitea-1.14.1-linux-amd64
 chmod +x gitea
 cp gitea /usr/local/bin/gitea
 
@@ -104,8 +102,7 @@ EOF
 
 # Enable & Start Gitea at boot
 systemctl daemon-reload
-systemctl enable gitea
-systemctl start gitea
+systemctl enable --now gitea
 
 # Check if Gitea is running
 systemctl status gitea
